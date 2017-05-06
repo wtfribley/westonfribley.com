@@ -1,0 +1,151 @@
+@import 'node_modules/normalize.css/normalize'
+@import 'node_modules/octicons/build/octicons'
+@import url('https://fonts.googleapis.com/css?family=Rubik:300,400,500,700,900')
+
+$desktop-page-width: 800px
+$mobile-page-width: 420px
+$page-gradient-start: white
+$page-gradient-end: #eaeaea
+
+$font-color: black
+$callout-color: #ff7525
+
+@mixin block($shrink: false, $direction: row)
+  display: flex
+  flex-direction: $direction
+  @if $shrink
+    flex: 0 0 auto
+  @else
+    flex: 1 1 auto
+
+//
+// typography
+// 
+html
+  color: $font-color
+  font-family: 'Rubik', sans-serif
+  font-size: 16px
+  font-weight: 400
+
+h1
+  font-size: 2.5rem
+  font-weight: 700
+
+h2, h3, h4
+  font-weight: 500
+
+a
+  color: $font-color
+  transition: color 0.15s ease-out
+  cursor: pointer
+  text-decoration: none
+  
+  &:hover
+    color: $callout-color
+
+figure
+  display: inline-block
+  margin: 0
+  text-align: center
+  
+  figcaption
+    display: none
+
+.callout
+  color: $callout-color
+
+//
+// content layout
+// 
+body
+  +block($direction: column)
+  height: 100vh
+  width: 100vw
+  align-items: center
+
+aside, footer
+  +block($shrink: true)
+
+header, main, section
+  +block
+  width: $desktop-page-width
+  margin: 0.5rem 1rem
+  
+  section
+    width: auto
+    margin: 0
+
+header
+  > section, > aside
+    align-items: flex-end
+
+main
+  display: block
+
+hr, footer
+  display: block
+  width: 100%
+
+footer
+  margin: 1rem
+  text-align: center
+
+//
+// content styling
+// 
+header
+  h1
+    margin: 0
+  a
+    margin: 0 1rem
+    &:last-child
+      margin-right: 0
+
+hr
+  margin: 0
+  border: none
+  border-top: 2px solid $font-color
+
+main h2
+  margin-top: 0
+  
+footer a figure
+  color: $font-color
+  
+//
+// mobile
+//
+@media screen and (max-device-width: $mobile-page-width)
+  body
+    align-items: stretch
+  
+  header, footer, main, section
+    width: auto
+    
+    section
+      width: auto
+      margin: 0
+    
+  header
+    margin-top: 1rem
+
+@media screen and (max-device-width: $mobile-page-width) and (orientation: portrait)  
+  header
+    flex-direction: column-reverse
+      
+    > aside
+      justify-content: space-between
+      
+      a
+        flex: 0 0 auto
+        margin: 0
+
+      figure figcaption
+        display: block
+
+//
+// tablet
+//
+@media screen and (max-device-width: $desktop-page-width) and (min-device-width: $mobile-page-width)
+  header, footer, main, section
+    width: $mobile-page-width
