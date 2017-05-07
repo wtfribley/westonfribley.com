@@ -6,6 +6,7 @@
     "start": "npm run server",
     "server": "npm run pug.watch & npm run sass.watch",
     "build": "npm run pug && npm run sass",
+    "deploy": "npm run build && ./scripts/deploy",
     "pug": "pug -O pug.conf.js --out dist src",
     "pug.watch": "pug -O pug.conf.js --watch --out dist src",
     "sass": "node-sass --output-style compressed src/site.sass dist/index.css",
@@ -14,8 +15,10 @@
   "author": "@wtfribley",
   "license": "MIT",
   "devDependencies": {
+    "dotenv": "^4.0.0",
     "node-sass": "^4.5.2",
-    "pug-cli": "^1.0.0-alpha6"
+    "pug-cli": "^1.0.0-alpha6",
+    "s3": "^4.4.0"
   },
   "dependencies": {
     "normalize.css": "^7.0.0",
