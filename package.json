@@ -1,5 +1,5 @@
 {
-  "name": "westonfribleydotcom",
+  "name": "westonfribley.com",
   "version": "1.0.0",
   "description": "The personal website of Weston Fribley",
   "scripts": {
@@ -13,6 +13,10 @@
     "sass.watch": "node-sass -w src/site.sass dist/index.css"
   },
   "author": "@wtfribley",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wtfribley/westonfribley.com.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "dotenv": "^4.0.0",
