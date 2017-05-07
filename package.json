@@ -6,10 +6,10 @@
     "start": "npm run server",
     "server": "npm run pug.watch & npm run sass.watch",
     "build": "npm run pug && npm run sass",
-    "pug": "pug -O pug.conf.js --out dist index.pug",
-    "pug.watch": "pug -O pug.conf.js --watch --out dist index.pug",
-    "sass": "node-sass --output-style compressed index.sass dist/index.css",
-    "sass.watch": "node-sass -w index.sass dist/index.css"
+    "pug": "pug -O pug.conf.js --out dist src",
+    "pug.watch": "pug -O pug.conf.js --watch --out dist src",
+    "sass": "node-sass --output-style compressed src/site.sass dist/index.css",
+    "sass.watch": "node-sass -w src/site.sass dist/index.css"
   },
   "author": "@wtfribley",
   "license": "MIT",
