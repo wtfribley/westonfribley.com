@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+const debug = require('debug')('server');
+const debugLr = require('debug')('tinylr');
+const emphasis = require('chalk').magenta;
+const path = require('path');
+
+const args = require('command-line-args')([
+  {name: 'root', type: String, defaultOption: true},
+  {name: 'notFound', alias: 'f', type: String},
+  {name: 'help', alias: 'h', type: Boolean}
+]);
+
+if (args.help) {
+  console.log(`
+    Usage: server [options] <root>
+
+    Options:
+      -f, --notFound [file]       Provide a custom 404 page.
+      -h, --help                  View this message.
+  `)
+  process.exit();
+}
+
+if (!args.root) {
+  throw new Error('Usage: the root argument is required.');
+  process.exit(1);
+}
+
+const ROOT = path.join(require('find-root')(), args.root);
+const LR_PORT = 35729;
+const PORT = 8000;
+
+
+/**
+ * Livereload
+ *
+ * See tinylr
+ *
+ * See chokidar
+ */
+
+debugLr('watching directory %s for changes', emphasis(ROOT));
+const tinylr = require('tiny-lr')();
+const watcher = require('chokidar').watch(ROOT);
+
+function changed(action) {
+  return filepath => {
+    let servedPath = path.relative(ROOT, filepath);
+    debugLr('file %s has %s.', emphasis(servedPath), action);
+    tinylr.changed({body: {files: servedPath}});
+  }
+}
+
+tinylr.listen(LR_PORT, () => {
+  console.log('Livereload server listening on port %s', emphasis(LR_PORT))
+});
+
+watcher.on('change', changed('changed'));
+watcher.on('add', changed('been added'));
+watcher.on('unlink', changed('been removed'));
+
+/**
+ * Static server
+ *
+ * See express
+ */
+const express = require('express');
+const onFinished = require('on-finished');
+const server = express();
+
+server.use((req, res, next) => {
+  onFinished(res, () => {
+    debug('%d: %s - %s', res.statusCode || 0, emphasis(req.method), req.originalUrl || req.url);
+  });
+  next();
+});
+
+server.use(express.static(ROOT));
+
+// Support custom 404 page.
+if (args.notFound) {
+  server.use((req, res) => {
+    res.status(404);
+
+    res.format({
+      html: () => res.sendFile(args.notFound, {root: ROOT}),
+      json: () => res.json({error: 'Not found'}),
+      default: () => res.type('txt').send('Not found')
+    });
+  });
+}
+
+server.listen(PORT, () => {
+  console.log('Static server listening on port: %s', emphasis(PORT));
+});

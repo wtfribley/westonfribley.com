@@ -20,7 +20,7 @@ $callout-color: #ff7525
 
 //
 // typography
-// 
+//
 html
   color: $font-color
   font-family: 'Rubik', sans-serif
@@ -39,7 +39,7 @@ a
   transition: color 0.15s ease-out
   cursor: pointer
   text-decoration: none
-  
+
   &:hover
     color: $callout-color
 
@@ -47,7 +47,7 @@ figure
   display: inline-block
   margin: 0
   text-align: center
-  
+
   figcaption
     display: none
 
@@ -56,7 +56,7 @@ figure
 
 //
 // content layout
-// 
+//
 body
   +block($direction: column)
   height: 100vh
@@ -70,7 +70,7 @@ header, main, section
   +block
   width: $desktop-page-width
   margin: 0.5rem 1rem
-  
+
   section
     width: auto
     margin: 0
@@ -92,7 +92,7 @@ footer
 
 //
 // content styling
-// 
+//
 header
   h1
     margin: 0
@@ -108,34 +108,34 @@ hr
 
 main h2
   margin-top: 0
-  
+
 footer a figure
   color: $font-color
-  
+
 //
 // mobile
 //
 @media screen and (max-device-width: $mobile-page-width)
   body
     align-items: stretch
-  
+
   header, footer, main, section
     width: auto
-    
+
     section
       width: auto
       margin: 0
-    
+
   header
     margin-top: 1rem
 
-@media screen and (max-device-width: $mobile-page-width) and (orientation: portrait)  
+@media screen and (max-device-width: $mobile-page-width) and (orientation: portrait)
   header
     flex-direction: column-reverse
-      
+
     > aside
       justify-content: space-between
-      
+
       a
         flex: 0 0 auto
         margin: 0
