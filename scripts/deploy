@@ -1,34 +1,110 @@
 #!/usr/bin/env node
 require('dotenv').config();
+const chalk = require('chalk');
+const debug = require('debug')('deploy');
+const info = chalk.magenta, success = chalk.bold.green, failure = chalk.bold.red;
+const path = require('path');
+const rl = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+const spawn = require('child_process').spawn;
 
 const BUILD_DIR = 'dist';
 const BUCKET = 'westonfribley.com';
+const REPO = require(path.join(require('find-root')(), 'package.json')).repository.url;
 
-const s3 = require('s3').createClient({
-  s3Options: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
+
+/**
+ * Upload the contents of the BUILD_DIR directory to the S3 bucket BUCKET.
+ *
+ * @param  {Function} done  Called when the upload completes.
+ * @return {void}
+ */
+function uploadToS3(done) {
+  const s3 = require('s3').createClient({
+    s3Options: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION,
+      logger: {log: message => debug('%s', message.replace(/\n/g, ''))}
+    }
+  });
+
+  const options = {
+    localDir: BUILD_DIR,
+    deleteRemoved: true,
+
+    s3Params: {
+      Bucket: BUCKET
+    }
+  };
+
+  console.log(`Deploying ${info(BUILD_DIR)} to S3 bucket: ${info(BUCKET)}`)
+  const uploader = s3.uploadDir(options);
+
+  uploader.on('progress',() => {
+    let total = uploader.progressTotal;
+    let percent = total === 0 ? 0 : Math.round(uploader.progressAmount / total);
+    debug('progress: %d', percent);
+  });
+
+  uploader.on('error', err => {
+    console.error(failure('Deployment failed'), '\n', err, '\n');
+    done();
+  });
+
+  uploader.on('end',() => {
+    console.log(success('Deployment succeeded!\n'));
+    done();
+  });
+}
+
+/**
+ * Spawn a git process to push the branch master to origin.
+ *
+ * @param  {Function} done  Called when the git process terminates.
+ * @return {void}
+ */
+function gitPush(done) {
+  const git = spawn('git', ['push', 'origin', 'master'], {stdio: 'inherit'});
+  git.on('close' done);
+}
+
+
+
+/**
+ * Define the steps in our deployment. The user will be prompted before each step begins.
+ */
+const steps = [
+  {
+    description: `upload ./${info(BUILD_DIR)} to S3 bucket ${info(BUCKET)}`,
+    action: uploadToS3
+  },
+  {
+    description: `push branch master to origin ${info(REPO)}`,
+    action: gitPush
   }
-});
+];
 
-const options = {
-  localDir: BUILD_DIR,
-  deleteRemoved: true,
-
-  s3Params: {
-    Bucket: BUCKET
+/**
+ * Execute a series of steps, prompting the user for confirmation before taking any action.
+ * Regardless of user input, all steps will be prompted.
+ *
+ * @param  {Array} steps  A list of steps, each containing a description and an action.
+ * @return {void}
+ */
+function executeSteps(steps) {
+  if (steps.length === 0) {
+    rl.close();
+    return process.exit();
   }
-};
 
-const uploader = s3.uploadDir(options);
-console.log(`Deploying ${BUILD_DIR} to S3 bucket: ${BUCKET}`)
+  const step = steps.shift();
+  rl.question(`About to ${step.description}. Proceed? (y/n)  `, response => {
+    const action = /^y(es)?$/i.test(response) ? step.action : callback => callback();
+    action(() => executeSteps(steps));
+  })
+}
 
-uploader.on('error', (err) => {
-  console.error('Deployment failed', '\n', err);
-  process.exit(1);
-});
-
-uploader.on('end', () => {
-  console.log('Deployment succeeded!');
-})
+executeSteps(steps);
