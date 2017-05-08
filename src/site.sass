@@ -36,22 +36,22 @@ h2, h3, h4
 
 a
   color: $font-color
-  transition: color 0.15s ease-out
   cursor: pointer
   text-decoration: none
-
-  &:hover
-    color: $callout-color
 
 figure
   display: inline-block
   margin: 0
+  color: $font-color
   text-align: center
 
   figcaption
     display: none
 
-.callout
+a, figure
+  transition: color 0.15s ease-out
+
+a:hover, figure:hover, .callout
   color: $callout-color
 
 //
@@ -109,8 +109,9 @@ hr
 main h2
   margin-top: 0
 
-footer a figure
-  color: $font-color
+footer a
+  figure, figure:hover
+    color: $font-color
 
 //
 // mobile
