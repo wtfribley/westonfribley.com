@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const debug = require('debug')('server');
 const debugLr = require('debug')('tinylr');
-const emphasis = require('chalk').magenta;
+const info = require('chalk').magenta;
 const path = require('path');
 
 
@@ -42,7 +42,7 @@ const ROOT = path.join(require('find-root')(), args.root);
  * See https://github.com/paulmillr/chokidar
  */
 
-debugLr('watching directory %s for changes', emphasis(ROOT));
+debugLr('watching directory %s for changes', info(ROOT));
 const tinylr = require('tiny-lr')();
 const watcher = require('chokidar').watch(ROOT);
 const LR_PORT = 35729;
@@ -50,13 +50,13 @@ const LR_PORT = 35729;
 function changed(action) {
   return filepath => {
     let servedPath = path.relative(ROOT, filepath);
-    debugLr('file %s has %s.', emphasis(servedPath), action);
+    debugLr('file %s has %s.', info(servedPath), action);
     tinylr.changed({body: {files: servedPath}});
   }
 }
 
 tinylr.listen(LR_PORT, () => {
-  console.log('Livereload server listening on port %s', emphasis(LR_PORT))
+  console.log('Livereload server listening on port %s', info(LR_PORT))
 });
 
 watcher.on('change', changed('changed'));
@@ -76,7 +76,7 @@ const PORT = 8000;
 
 server.use((req, res, next) => {
   onFinished(res, () => {
-    debug('%d: %s - %s', res.statusCode || 0, emphasis(req.method), req.originalUrl || req.url);
+    debug('%d: %s - %s', res.statusCode || 0, info(req.method), req.originalUrl || req.url);
   });
   next();
 });
@@ -97,5 +97,5 @@ if (args.notFound) {
 }
 
 server.listen(PORT, () => {
-  console.log('Static server listening on port: %s', emphasis(PORT));
+  console.log('Static server listening on port: %s', info(PORT));
 });
