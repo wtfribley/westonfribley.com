@@ -4,6 +4,10 @@ const debugLr = require('debug')('tinylr');
 const emphasis = require('chalk').magenta;
 const path = require('path');
 
+
+/**
+ * Handle command line arguments.
+ */
 const args = require('command-line-args')([
   {name: 'root', type: String, defaultOption: true},
   {name: 'notFound', alias: 'f', type: String},
@@ -26,22 +30,22 @@ if (!args.root) {
   process.exit(1);
 }
 
+/**
+ * This is the directory from which we'll be serving files.
+ */
 const ROOT = path.join(require('find-root')(), args.root);
-const LR_PORT = 35729;
-const PORT = 8000;
-
 
 /**
- * Livereload
+ * Watch root directory for changes, do livereload.
  *
- * See tinylr
- *
- * See chokidar
+ * See https://github.com/mklabs/tiny-lr
+ * See https://github.com/paulmillr/chokidar
  */
 
 debugLr('watching directory %s for changes', emphasis(ROOT));
 const tinylr = require('tiny-lr')();
 const watcher = require('chokidar').watch(ROOT);
+const LR_PORT = 35729;
 
 function changed(action) {
   return filepath => {
@@ -59,14 +63,16 @@ watcher.on('change', changed('changed'));
 watcher.on('add', changed('been added'));
 watcher.on('unlink', changed('been removed'));
 
+
 /**
- * Static server
+ * Static file server.
  *
- * See express
+ * See https://github.com/expressjs/express
  */
 const express = require('express');
 const onFinished = require('on-finished');
 const server = express();
+const PORT = 8000;
 
 server.use((req, res, next) => {
   onFinished(res, () => {
